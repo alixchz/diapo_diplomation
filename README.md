@@ -1,0 +1,1 @@
+# diapo_diplomation
