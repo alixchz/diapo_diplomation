@@ -1,3 +1,5 @@
 *.yml
 photos/
-contenu_beamer.tex
+contenu_beamer*.tex
+photos_cropped/
+slides_Frost/
