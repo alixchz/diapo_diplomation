@@ -6,18 +6,56 @@ from PIL import Image, ImageDraw
 from datetime import datetime
 import pytz
 
-csv_filename = 'test.tsv'
+IMAGE_SIZE = 200 # temporaire pour avoir pdf plus léger
+csv_filename = 'personnalisation_de_ton_passage_sur_scene.tsv'
 photos_folder = 'photos'
 photos_folder_cropped = 'photos_cropped'
 
+def format_name(name):
+    return '-'.join(word.title() for word in name.split('-'))
+
+def sanitize_text(text):
+    sanitized_text = text
+    if len(sanitized_text) == 0:
+        return sanitized_text
+    
+    # Replace the first occurrence of "" with \\og{}
+    sanitized_text = sanitized_text.replace('""', '\\og{} ', 1)
+    # Replace the remaining occurrences of "" with \\fg
+    sanitized_text = sanitized_text.replace('""', '\\fg{} ')
+
+    sanitized_text = sanitized_text.replace("&", "\\&")
+    sanitized_text = sanitized_text.replace("%", "\\%")
+    sanitized_text = sanitized_text.replace("#", "\\#")
+    sanitized_text = sanitized_text.replace("œ", "\\oe ")
+    sanitized_text = sanitized_text.replace("_", "\\_")
+    sanitized_text = sanitized_text.replace("«", "\\og{} ")
+    sanitized_text = sanitized_text.replace("“", "\\og{} ")
+    sanitized_text = sanitized_text.replace("»", "\\fg{} ")
+    sanitized_text = sanitized_text.replace("”", "\\fg{} ")
+    sanitized_text = sanitized_text.replace('""', "\\fg{} ")
+    sanitized_text = sanitized_text.replace("’", "'")
+    sanitized_text = sanitized_text.replace("  ", " ")
+    if sanitized_text[0]=='"':
+        sanitized_text = '\\og{} ' + sanitized_text[1:]
+        sanitized_text = sanitized_text.replace('"', '\\fg{} ')
+    # Remove strange characters
+    allowed_characters = set("¡áí{}\<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
+    sanitized_text = "".join(c for c in sanitized_text if c in allowed_characters)
+    if sanitized_text != text:
+        print(f"Texte nettoyé : {text} -> {sanitized_text}")
+    return sanitized_text
+
 class Student:
-    def __init__(self, prenom, nom, mention, citation, photo_url, photo_path = ""):
-        self.prenom = prenom
-        self.nom = nom
-        self.mention = mention
-        self.citation = citation
+    def __init__(self, prenom, nom, etunum, mention, citation, photo_url, photo_path = ""):
+        self.prenom = format_name(prenom)
+        self.nom = format_name(nom)
+        self.etunum = etunum
+        self.mention = sanitize_text(mention)
+        self.citation = sanitize_text(citation)
         self.photo_url = photo_url
         self.photo_path = photo_path
+
 
 # Fonction pour lire le fichier TSV et récupérer les données des étudiants
 def lire_fichier_tsv(nom_fichier):
@@ -29,10 +67,11 @@ def lire_fichier_tsv(nom_fichier):
             data = line.strip().split('\t')
             prenom = data[9].strip('"')
             nom = data[10].strip('"')
-            mention = data[11].strip('"')
-            citation = data[-1].strip('"')
-            photo_url = data[-3].strip('"')
-            student = Student(prenom, nom, mention, citation, photo_url)
+            etunum = data[11].strip('"')
+            mention = data[12].strip('"')
+            citation = data[13][1:-1]
+            photo_url = data[14].strip('"')
+            student = Student(prenom, nom, etunum, mention, citation, photo_url)
             students.append(student)
     return students
 
@@ -51,7 +90,7 @@ data = {
 }
 
 def rogner_photo(photo_path):
-    desired_size = 1000
+    desired_size = IMAGE_SIZE
     img = Image.open(photo_path)
     img=img.convert('RGBA')
     # On veut faire une image carrée de hauteur 1000px -> on
@@ -109,6 +148,8 @@ def telecharger_photos(students):
             photo_path = os.path.join(photos_folder, photo_name)
             if not os.path.isfile(photo_path):
                 photo_url = student.photo_url
+                if len(photo_url) == 0:
+                    continue
                 response = session.get(photo_url, stream=True)
                 if response.status_code == 200:
                     with open(photo_path, 'wb') as photo_file:
@@ -122,16 +163,20 @@ def telecharger_photos(students):
 
 telecharger_photos(students)
 
+
 # Fonction pour écrire le contenu des étudiants dans le fichier contenu_beamer.tex
 def ecrire_contenu_beamer(students):
     timestamp = datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y_%m_%d_%Hh%M_%S")
     with open(f"contenu_beamer_{timestamp}.tex", "w") as f:
         for student in students:
-            f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}\n")
-            f.write("\\begin{figure}\n")
-            f.write("    \\includegraphics[height=0.4\\textheight]{../" + student.photo_path + "}\n")
-            f.write("\\end{figure}\n")
-            f.write("\\textit{\\og{}" + student.citation + "\\fg}\n")
+            f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}{Mention " + student.mention + "}\n")
+
+            if len(student.photo_path) > 0:
+                f.write("\\begin{figure}\n")
+                f.write("    \\includegraphics[height=0.4\\textheight]{../" + student.photo_path + "}\n")
+                f.write("\\end{figure}\n")
+            if len(student.citation) > 0:
+                f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
             f.write("\\end{frame}\n\n")
 
 # Appeler la fonction pour écrire le contenu dans le fichier
