@@ -1,173 +1,98 @@
 import os
-import requests
-from tqdm import tqdm
-import yaml
-from PIL import Image, ImageDraw
 from datetime import datetime
 import pytz
 
+from get_data_from_csv import read_framaforms_tsv, read_students_list
+from photos import rogner_photo, telecharger_photos
+from mentions import MENTIONS_OF_DOMINANTES, FULL_NAMES
+
 IMAGE_SIZE = 200 # temporaire pour avoir pdf plus léger
-csv_filename = 'personnalisation_de_ton_passage_sur_scene.tsv'
+
+# Chemins vers les données
+csv_framaforms_path = 'data/personnalisation_de_ton_passage_sur_scene.tsv'
+excel_presents = 'data/guests_and_checkins_rdd_cs_2024_31.xlsx'
+
+# Dossiers locaux de stockage des photos (à créer si besoin)
 photos_folder = 'photos'
 photos_folder_cropped = 'photos_cropped'
 
-def format_name(name):
-    return '-'.join(word.title() for word in name.split('-'))
+class Session():
+    def __init__(self, location, timeslot_nb, time_start, dominantes):
+        self.location = location
+        self.timeslot_nb = timeslot_nb
+        self.time_start = time_start
+        self.dominantes = {}
+        for nom_dominante in dominantes:
+            self.dominantes[nom_dominante] = MENTIONS_OF_DOMINANTES[nom_dominante]
 
-def sanitize_text(text):
-    sanitized_text = text
-    if len(sanitized_text) == 0:
-        return sanitized_text
-    
-    # Replace the first occurrence of "" with \\og{}
-    sanitized_text = sanitized_text.replace('""', '\\og{} ', 1)
-    # Replace the remaining occurrences of "" with \\fg
-    sanitized_text = sanitized_text.replace('""', '\\fg{} ')
+# Répartition dans les sessions
+sessions = [
+    Session('Michelin', 1, '14h00', ['MDS', 'PNT']), 
+    Session('EDF'     , 1, '14h15', ['IN', 'SCOC']), 
+    Session('Michelin', 2, '16h00', ['EN', 'VSE']), 
+    Session('EDF',      2, '16h15', ['GSI', 'CVT'])
+    ]
 
-    sanitized_text = sanitized_text.replace("&", "\\&")
-    sanitized_text = sanitized_text.replace("%", "\\%")
-    sanitized_text = sanitized_text.replace("#", "\\#")
-    sanitized_text = sanitized_text.replace("œ", "\\oe ")
-    sanitized_text = sanitized_text.replace("_", "\\_")
-    sanitized_text = sanitized_text.replace("«", "\\og{} ")
-    sanitized_text = sanitized_text.replace("“", "\\og{} ")
-    sanitized_text = sanitized_text.replace("»", "\\fg{} ")
-    sanitized_text = sanitized_text.replace("”", "\\fg{} ")
-    sanitized_text = sanitized_text.replace('""', "\\fg{} ")
-    sanitized_text = sanitized_text.replace("’", "'")
-    sanitized_text = sanitized_text.replace("  ", " ")
-    if sanitized_text[0]=='"':
-        sanitized_text = '\\og{} ' + sanitized_text[1:]
-        sanitized_text = sanitized_text.replace('"', '\\fg{} ')
-    # Remove strange characters
-    allowed_characters = set("¡áí{}\<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
-    sanitized_text = "".join(c for c in sanitized_text if c in allowed_characters)
-    if sanitized_text != text:
-        print(f"Texte nettoyé : {text} -> {sanitized_text}")
-    return sanitized_text
+# Récupération de la liste de tous les élèves présents
+students_all = read_students_list(excel_presents)
 
-class Student:
-    def __init__(self, prenom, nom, etunum, mention, citation, photo_url, photo_path = ""):
-        self.prenom = format_name(prenom)
-        self.nom = format_name(nom)
-        self.etunum = etunum
-        self.mention = sanitize_text(mention)
-        self.citation = sanitize_text(citation)
-        self.photo_url = photo_url
-        self.photo_path = photo_path
+# Récupération des données liées à la personnalisation
+students_personalized = read_framaforms_tsv(csv_framaforms_path)
+print(f"\nNombre d'étudiants ayant personnalisé leur slide : {len(students_personalized)}\n")
+default_photo_path = rogner_photo('photos/default.jpg', desired_size=IMAGE_SIZE)
+telecharger_photos(students_personalized, default_photo_path, desired_size=IMAGE_SIZE)
 
+for student in students_all:
+    for i, student_personalized in enumerate(students_personalized):
+        if student.etunum == student_personalized.etunum:
+            student.add_personnalization(student_personalized)
+            students_personalized.pop(i)
+            break
+print(f"\n{len(students_personalized)} réponses du framaforms n'ont pas de match par etunum. Tentative par le nom et prénom...")
+to_remove = []
+for i, unmatched_personnalization in enumerate(students_personalized):
+    for student in students_all:
+        if unmatched_personnalization.nom == student.nom:
+            if unmatched_personnalization.prenom[0:3] == student.prenom[0:3]:
+                student.add_personnalization(unmatched_personnalization)
+                to_remove.append(i)
+students_personalized = [s for i, s in enumerate(students_personalized) if i not in to_remove]
+if len(students_personalized) > 0:
+    raise Exception(f"Les étudiants suivants n'ont pas été trouvés : { [[s.nom, s.prenom, s.etunum] for s in students_personalized]}")
+else:
+    print("Tous les étudiants ayant répondu au framaforms ont été trouvés.\n")
 
-# Fonction pour lire le fichier TSV et récupérer les données des étudiants
-def lire_fichier_tsv(nom_fichier):
-    students = []
-    with open(nom_fichier, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
-        # Ignorer les deux premières lignes qui ne contiennent pas de données d'étudiant
-        for line in lines[3:]:
-            data = line.strip().split('\t')
-            prenom = data[9].strip('"')
-            nom = data[10].strip('"')
-            etunum = data[11].strip('"')
-            mention = data[12].strip('"')
-            citation = data[13][1:-1]
-            photo_url = data[14].strip('"')
-            student = Student(prenom, nom, etunum, mention, citation, photo_url)
-            students.append(student)
-    return students
+students_by_mention = {}
+for student in students_all:
+    mention = student.mention
+    if mention not in students_by_mention:
+        students_by_mention[mention] = []
+    students_by_mention[mention].append(student)
 
-# Lecture du fichier TSV et récupération des données des étudiants
-students = lire_fichier_tsv(csv_filename)
+for mention in students_by_mention:
+    students_by_mention[mention].sort(key=lambda student: student.nom)
 
-print(f"Nombre d'étudiants : {len(students)}\n")
+print("Répartition des étudiants par mention :")
+for mention in students_by_mention:
+    print(f"{mention} : {len(students_by_mention[mention])} étudiants")
+    print([student.nom for student in students_by_mention[mention]])
 
-credentials = yaml.safe_load(open('credentials.yml'))
-data = {
-    'name': credentials["username"],
-    'pass': credentials["password"],
-    'form_build_id': 'form-URbK4Py_-m4VfzceQLTp9L8vqQwrDg1F8ia_V54DZe0',
-    'form_id': 'user_login',
-    'op': 'Se connecter'
-}
+for session in sessions:
+    for dominante in session.dominantes.keys():
+        print('>>>', dominante)
+        for mention in session.dominantes[dominante]:
+            print(mention)
+    break
 
-def rogner_photo(photo_path):
-    desired_size = IMAGE_SIZE
-    img = Image.open(photo_path)
-    img=img.convert('RGBA')
-    # On veut faire une image carrée de hauteur 1000px -> on
-    # prend la plus petit dimension de l'image et on la ramène à 1000px
-    # 1er cas : la largeur est plus grande que la hauteur : on ramène la hauteur à
-    # la hauteur désirée et on ajuste la largeur
-    if img.size[0] >= img.size[1]:
-        ratio_old_to_new = desired_size / img.size[1]
-        img = img.resize((int(ratio_old_to_new * img.size[0]), desired_size))
-        # Coordonnées de l'ellipse
-        # Point en haut à gauche
-        x_0, y_0 = int(img.size[0] / 2 - desired_size / 2), 0
-        # Point en bas à droite de l'ellipse
-        x_1, y_1 = int(desired_size / 2 + img.size[0] / 2), desired_size
-
-    # Sinon on ramène la largeur à 1000 et on ajuste la hauteur
-    else:
-        ratio_old_to_new = desired_size / img.size[0]
-        img = img.resize((desired_size, int(ratio_old_to_new * img.size[1])))
-        # Coordonnées de l'ellipse
-        # Point en haut à gauche
-        x_0, y_0 = 0, int(img.size[1] / 2 - desired_size / 2)
-        # Point en bas à droite de l'ellipse
-        x_1, y_1 = desired_size, int(desired_size / 2 + img.size[1] / 2)
-
-    mask = Image.new("L", img.size, 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((x_0, y_0, x_1, y_1), fill=255)
-
-    # Apply the mask to the image
-    img.putalpha(mask)
-
-    # Suppress the image outside the mask
-    img = img.crop(img.getbbox())
-    new_width=img.size[0]
-    new_width=new_width*3700
-    new_height=img.size[1]
-    new_height=new_height*3700
-
-    photo_name = os.path.basename(photo_path).replace('jpg', 'png')
-    cropped_photo_path = os.path.join(photos_folder_cropped, photo_name)
-    img.save(cropped_photo_path)
-    return cropped_photo_path
-
-def telecharger_photos(students):
-    if not os.path.exists(photos_folder):
-        os.makedirs(photos_folder)
-    session = requests.session()
-    # Envoyer la requête POST pour se connecter
-    response = session.post('https://framaforms.org/user', data=data)
-    if response.status_code == 200:
-        print("Connexion à Framaforms réussie !\nTéléchargement des photos...")
-        for student in tqdm(students):
-            photo_name = f"{student.prenom}_{student.nom}.jpg"
-            photo_path = os.path.join(photos_folder, photo_name)
-            if not os.path.isfile(photo_path):
-                photo_url = student.photo_url
-                if len(photo_url) == 0:
-                    continue
-                response = session.get(photo_url, stream=True)
-                if response.status_code == 200:
-                    with open(photo_path, 'wb') as photo_file:
-                        photo_file.write(response.content)
-                else:
-                    print(f"Impossible de télécharger la photo de {student.prenom} {student.nom}.")
-            cropped_photo_path = rogner_photo(photo_path)
-            student.photo_path = cropped_photo_path
-    else:
-        print("Échec de la connexion.")
-
-telecharger_photos(students)
-
-
-# Fonction pour écrire le contenu des étudiants dans le fichier contenu_beamer.tex
-def ecrire_contenu_beamer(students):
+def generate_beamer(session):
+    students = session.students
+    # Écrire le contenu des étudiants dans le fichier contenu_beamer.tex
+    beamer_content_filename = f"contenu_beamer_session{session.timeslot_nb}_{session.location}.tex"
     timestamp = datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y_%m_%d_%Hh%M_%S")
-    with open(f"contenu_beamer_{timestamp}.tex", "w") as f:
+    if os.path.isfile(beamer_content_filename):
+        os.rename(beamer_content_filename, f"contenu_beamer_session{session.timeslot_nb}_{session.location}_{timestamp}.tex")
+    with open(beamer_content_filename, "w") as f:
+        f.write("\\begin{section}{" + dominante + "}")
         for student in students:
             f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}{Mention " + student.mention + "}\n")
 
@@ -178,8 +103,5 @@ def ecrire_contenu_beamer(students):
             if len(student.citation) > 0:
                 f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
             f.write("\\end{frame}\n\n")
-
-# Appeler la fonction pour écrire le contenu dans le fichier
-ecrire_contenu_beamer(students)
-
-print('\nBeamer généré avec succès !\n')
+        f.write("\\end{section}\n")
+    print('\nBeamer généré avec succès !\n')
