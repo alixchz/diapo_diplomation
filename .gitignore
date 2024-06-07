@@ -4,3 +4,4 @@ contenu_beamer*.tex
 photos_cropped/
 slides_Frost/
 .~lock*
+__pycache__/

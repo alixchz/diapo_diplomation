@@ -5,12 +5,13 @@ from mentions import FULL_NAMES
 def sanitize_mention(mention_from_excel):
     if len(mention_from_excel) == 0:
         return ""
+    mention_from_excel = mention_from_excel.replace('Msc', 'MSc')
+    mention_from_excel = mention_from_excel.replace('MSc IA', 'MSc AI')
     matches = []
     for mention in FULL_NAMES.keys():
         if mention in mention_from_excel:
             matches.append(mention)
     if len(matches) == 0:
-        print(matches)
         raise Exception(f"Pas de correspondance pour la mention '{mention_from_excel}'.")
     return max(matches, key=len)
 
@@ -69,6 +70,8 @@ def handle_mention_exceptions(mention_autre):
     raise Exception(f"Exception non gérée : '{mention_autre}'")
 
 def read_students_list(nom_fichier):
+    with open('mentions_autres_affectation.csv', 'w') as file:
+        file.write(f"etunum;prenom;nom;mention_autre;mention\n")
     students = []
     df = pd.read_excel(nom_fichier)
     for _, row in df.iterrows():
@@ -80,6 +83,9 @@ def read_students_list(nom_fichier):
         if mention == 'Autre':
             mention_autre = row['mention_autre']
             mention = handle_mention_exceptions(mention_autre)
+            with open('mentions_autres_affectation.csv', 'a') as file:
+                file.write(f"{etunum};{prenom};{nom};{mention_autre};{mention}\n")
+            
         student = Student(prenom, nom, etunum, mention, email)
         students.append(student)
     return students

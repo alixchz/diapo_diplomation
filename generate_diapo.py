@@ -6,7 +6,7 @@ from get_data_from_csv import read_framaforms_tsv, read_students_list
 from photos import rogner_photo, telecharger_photos
 from mentions import MENTIONS_OF_DOMINANTES, FULL_NAMES
 
-IMAGE_SIZE = 200 # temporaire pour avoir pdf plus léger
+IMAGE_SIZE = 250 # temporaire pour avoir pdf plus léger
 
 # Chemins vers les données
 csv_framaforms_path = 'data/personnalisation_de_ton_passage_sur_scene.tsv'
@@ -43,6 +43,7 @@ default_photo_path = rogner_photo('photos/default.jpg', desired_size=IMAGE_SIZE)
 telecharger_photos(students_personalized, default_photo_path, desired_size=IMAGE_SIZE)
 
 for student in students_all:
+    student.photo_path = default_photo_path
     for i, student_personalized in enumerate(students_personalized):
         if student.etunum == student_personalized.etunum:
             student.add_personnalization(student_personalized)
@@ -72,36 +73,51 @@ for student in students_all:
 for mention in students_by_mention:
     students_by_mention[mention].sort(key=lambda student: student.nom)
 
-print("Répartition des étudiants par mention :")
+print(students_by_mention.keys())
+total = 0
+print("\nRépartition des étudiants par mention :")
 for mention in students_by_mention:
     print(f"{mention} : {len(students_by_mention[mention])} étudiants")
-    print([student.nom for student in students_by_mention[mention]])
-
+    #print([student.nom for student in students_by_mention[mention]])
+    total += len(students_by_mention[mention])
+print(f"\nTotal : {total} étudiants\n")
+'''
 for session in sessions:
     for dominante in session.dominantes.keys():
         print('>>>', dominante)
         for mention in session.dominantes[dominante]:
             print(mention)
     break
+'''
 
 def generate_beamer(session):
-    students = session.students
     # Écrire le contenu des étudiants dans le fichier contenu_beamer.tex
     beamer_content_filename = f"contenu_beamer_session{session.timeslot_nb}_{session.location}.tex"
     timestamp = datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y_%m_%d_%Hh%M_%S")
     if os.path.isfile(beamer_content_filename):
         os.rename(beamer_content_filename, f"contenu_beamer_session{session.timeslot_nb}_{session.location}_{timestamp}.tex")
     with open(beamer_content_filename, "w") as f:
-        f.write("\\begin{section}{" + dominante + "}")
-        for student in students:
-            f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}{Mention " + student.mention + "}\n")
+        for dominante in session.dominantes.keys():
+            f.write("\\begin{section}{Dominante " + dominante + " - " + FULL_NAMES[dominante] + "}")
+            for mention in session.dominantes[dominante]:
+                f.write("\\begin{subsection}{Mention " + mention + " - " + FULL_NAMES[mention] + "}")
+                if mention not in students_by_mention:
+                    print(f"La mention {mention} n'a pas d'étudiant.")
+                    continue
+                for student in students_by_mention[mention]:
+                    f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}{Mention " + student.mention + "}\n")
 
-            if len(student.photo_path) > 0:
-                f.write("\\begin{figure}\n")
-                f.write("    \\includegraphics[height=0.4\\textheight]{../" + student.photo_path + "}\n")
-                f.write("\\end{figure}\n")
-            if len(student.citation) > 0:
-                f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
-            f.write("\\end{frame}\n\n")
-        f.write("\\end{section}\n")
+                    if len(student.photo_path) > 0:
+                        f.write("\\begin{figure}\n")
+                        f.write("    \\includegraphics[height=0.4\\textheight]{../" + student.photo_path + "}\n")
+                        f.write("\\end{figure}\n")
+                    if len(student.citation) > 0:
+                        f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
+                    f.write("\\end{frame}\n\n")
+                f.write("\\end{subsection}\n")
+            f.write("\\end{section}\n")
+            break
     print('\nBeamer généré avec succès !\n')
+
+for session in sessions:
+    generate_beamer(session)

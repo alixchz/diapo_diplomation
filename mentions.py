@@ -26,7 +26,14 @@ FULL_NAMES = {
     'SCOM': 'Supply Chain \\& Operations Management',
     'MSc ITM': 'Master in Industry Transformation Management',
     'AET': 'Aéronautique, Espace et Transports',
-    'SIC': 'Sciences et Ingénieries de la Construction'
+    'SIC': 'Sciences et Ingénieries de la Construction',
+    'MDS': 'Mathématiques et Data Sciences',
+    'PNT': 'Photonique et Nanotechnologies',
+    'IN': 'Informatique et Numérique',
+    'EN': 'Énergie',
+    'VSE': 'Vivant, Santé, Environnement',
+    'GSI': 'Grands Systèmes en Interaction',
+    'CVT': 'Construction, Ville, Transports',
 }
 
 MENTIONS_OF_DOMINANTES = {

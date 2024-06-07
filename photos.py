@@ -2,7 +2,7 @@ import os
 import yaml
 import requests
 from tqdm import tqdm
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 
 credentials = yaml.safe_load(open('credentials.yml'))
 data = {
@@ -24,6 +24,7 @@ def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cr
             return cropped_photo_path
         
     img = Image.open(photo_path)
+    img = ImageOps.exif_transpose(img)
     img=img.convert('RGBA')
     # On veut faire une image carrée de hauteur 1000px -> on
     # prend la plus petit dimension de l'image et on la ramène à 1000px
@@ -48,6 +49,7 @@ def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cr
         # Point en bas à droite de l'ellipse
         x_1, y_1 = desired_size, int(desired_size / 2 + img.size[1] / 2)
 
+
     mask = Image.new("L", img.size, 0)
     draw = ImageDraw.Draw(mask)
     draw.ellipse((x_0, y_0, x_1, y_1), fill=255)
@@ -64,6 +66,7 @@ def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cr
 
     img.save(cropped_photo_path)
     return cropped_photo_path
+
 
 def telecharger_photos(students, default_photo_path, desired_size=1000, photos_folder='photos'):
     if not os.path.exists(photos_folder):

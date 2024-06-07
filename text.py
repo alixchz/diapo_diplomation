@@ -29,6 +29,10 @@ def sanitize_text(text):
     # Remove strange characters
     allowed_characters = set("¡áí{}\<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
     sanitized_text = "".join(c for c in sanitized_text if c in allowed_characters)
-    #if sanitized_text != text:
-    #    print(f"Texte nettoyé : {text} -> {sanitized_text}")
+
+    # Cas particuliers
+    sanitized_text = sanitized_text.replace('(  .  )', '')
+    
+    if sanitized_text != text:
+        print(f"Texte nettoyé : {text} -> {sanitized_text}")
     return sanitized_text
