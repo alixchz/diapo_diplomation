@@ -12,9 +12,12 @@ IMAGE_SIZE = 250 # temporaire pour avoir pdf plus léger
 csv_framaforms_path = 'data/personnalisation_de_ton_passage_sur_scene.tsv'
 excel_presents = 'data/guests_and_checkins_rdd_cs_2024_31.xlsx'
 
+root_path = os.path.dirname(os.path.abspath(__file__))
 # Dossiers locaux de stockage des photos (à créer si besoin)
-photos_folder = 'photos'
-photos_folder_cropped = 'photos_cropped'
+photos_folder = os.path.join(root_path, 'data/photos')
+photos_folder_cropped = os.path.join(root_path, 'data/photos_cropped')
+if not os.path.isdir('checks'):
+    os.mkdir('checks')
 
 class Session():
     def __init__(self, location, timeslot_nb, time_start, dominantes):
@@ -39,8 +42,8 @@ students_all = read_students_list(excel_presents)
 # Récupération des données liées à la personnalisation
 students_personalized = read_framaforms_tsv(csv_framaforms_path)
 print(f"\nNombre d'étudiants ayant personnalisé leur slide : {len(students_personalized)}\n")
-default_photo_path = rogner_photo('photos/default.jpg', desired_size=IMAGE_SIZE)
-telecharger_photos(students_personalized, default_photo_path, desired_size=IMAGE_SIZE)
+default_photo_path = rogner_photo('data/photos/default.jpg', photos_folder_cropped=os.path.join(os.path.dirname(photos_folder), "photos_cropped"), desired_size=IMAGE_SIZE)
+telecharger_photos(students_personalized, default_photo_path, photos_folder, desired_size=IMAGE_SIZE, )
 
 for student in students_all:
     student.photo_path = default_photo_path
@@ -73,29 +76,30 @@ for student in students_all:
 for mention in students_by_mention:
     students_by_mention[mention].sort(key=lambda student: student.nom)
 
-print(students_by_mention.keys())
+# Comptage du nombre d'étudiants par mention
 total = 0
 print("\nRépartition des étudiants par mention :")
 for mention in students_by_mention:
     print(f"{mention} : {len(students_by_mention[mention])} étudiants")
-    #print([student.nom for student in students_by_mention[mention]])
     total += len(students_by_mention[mention])
 print(f"\nTotal : {total} étudiants\n")
-'''
+
+# Comptage du nombre d'étudiants par session
 for session in sessions:
+    total = 0
     for dominante in session.dominantes.keys():
-        print('>>>', dominante)
         for mention in session.dominantes[dominante]:
-            print(mention)
-    break
-'''
+            if mention in students_by_mention:
+                total += len(students_by_mention[mention])
+    print(f"Session {session.timeslot_nb} - {session.location} - {session.time_start} : {total} étudiants")
 
 def generate_beamer(session):
     # Écrire le contenu des étudiants dans le fichier contenu_beamer.tex
     beamer_content_filename = f"contenu_beamer_session{session.timeslot_nb}_{session.location}.tex"
     timestamp = datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y_%m_%d_%Hh%M_%S")
     if os.path.isfile(beamer_content_filename):
-        os.rename(beamer_content_filename, f"contenu_beamer_session{session.timeslot_nb}_{session.location}_{timestamp}.tex")
+        os.rename(beamer_content_filename, f"archives_contenu_beamer/contenu_beamer_session{session.timeslot_nb}_{session.location}_{timestamp}.tex")
+
     with open(beamer_content_filename, "w") as f:
         for dominante in session.dominantes.keys():
             f.write("\\begin{section}{Dominante " + dominante + " - " + FULL_NAMES[dominante] + "}")
@@ -109,15 +113,14 @@ def generate_beamer(session):
 
                     if len(student.photo_path) > 0:
                         f.write("\\begin{figure}\n")
-                        f.write("    \\includegraphics[height=0.4\\textheight]{../" + student.photo_path + "}\n")
+                        f.write("    \\includegraphics[height=0.4\\textheight]{" + student.photo_path + "}\n")
                         f.write("\\end{figure}\n")
                     if len(student.citation) > 0:
                         f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
                     f.write("\\end{frame}\n\n")
                 f.write("\\end{subsection}\n")
             f.write("\\end{section}\n")
-            break
-    print('\nBeamer généré avec succès !\n')
 
 for session in sessions:
     generate_beamer(session)
+print('\nBeamers générés avec succès !\n')

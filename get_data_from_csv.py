@@ -37,6 +37,9 @@ class Student:
 
 # Fonction pour lire le fichier TSV et récupérer les données des étudiants
 def read_framaforms_tsv(nom_fichier):
+    with open('checks/check_citation_cleaning.csv', 'w') as file:
+        file.write(f"original_citation;cleaned_citation\n")
+
     students = []
     with open(nom_fichier, 'r', encoding='utf-8') as file:
         lines = file.readlines()
@@ -56,21 +59,21 @@ def handle_mention_exceptions(mention_autre):
     exceptions = {
         'SCOM': ['Génie Industriel'],
         'MSc ITM': ['IMT', 'ITM', 'Industry Transformation', 'Industry Transfomation'],
+        'MSc AI': ['MSc AI'],
         'CYBER': ['Infosec'],
         'IA': ['AI', 'IA', 'Artificial Intelligence', 'Intelligence Artificielle'],
         'ELEN': ['ELEN'],
         'MACS': ['MACS'],
-        'PSY': ['DD'] # ATTTNTION fort risque que ce ne soit pas robuste, fonctionne uniquement car 1 seul élève avait mis "DD" comme mention autre
+        'PSY': ['DD'] # ATTENTION fort risque que ce ne soit pas robuste, fonctionne uniquement car 1 seul élève avait mis "DD" comme mention autre
     }
     for mention, keywords in exceptions.items():
         for keyword in keywords:
             if keyword in mention_autre:
-                print(f'Mention "autre" : "{mention_autre}" -> "{mention}"')
                 return mention
     raise Exception(f"Exception non gérée : '{mention_autre}'")
 
 def read_students_list(nom_fichier):
-    with open('mentions_autres_affectation.csv', 'w') as file:
+    with open('checks/mentions_autres_affectation.csv', 'w') as file:
         file.write(f"etunum;prenom;nom;mention_autre;mention\n")
     students = []
     df = pd.read_excel(nom_fichier)
@@ -83,9 +86,8 @@ def read_students_list(nom_fichier):
         if mention == 'Autre':
             mention_autre = row['mention_autre']
             mention = handle_mention_exceptions(mention_autre)
-            with open('mentions_autres_affectation.csv', 'a') as file:
+            with open('checks/mentions_autres_affectation.csv', 'a') as file:
                 file.write(f"{etunum};{prenom};{nom};{mention_autre};{mention}\n")
-            
         student = Student(prenom, nom, etunum, mention, email)
         students.append(student)
     return students

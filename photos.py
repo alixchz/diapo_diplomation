@@ -13,7 +13,7 @@ data = {
     'op': 'Se connecter'
 }
 
-def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cropped'):
+def rogner_photo(photo_path, photos_folder_cropped, desired_size=1000):
     photo_name = os.path.basename(photo_path).replace('jpg', 'png')
     cropped_photo_path = os.path.join(photos_folder_cropped, photo_name)
 
@@ -58,8 +58,7 @@ def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cr
     img.putalpha(mask)
 
     # Suppress the image outside the mask
-    img = img.crop(img.getbbox())
-    new_width=img.size[0]
+                                                                            
     new_width=new_width*3700
     new_height=img.size[1]
     new_height=new_height*3700
@@ -68,7 +67,7 @@ def rogner_photo(photo_path, desired_size=1000, photos_folder_cropped='photos_cr
     return cropped_photo_path
 
 
-def telecharger_photos(students, default_photo_path, desired_size=1000, photos_folder='photos'):
+def telecharger_photos(students, default_photo_path, photos_folder, desired_size=1000):
     if not os.path.exists(photos_folder):
         os.makedirs(photos_folder)
     session = requests.session()
@@ -90,7 +89,7 @@ def telecharger_photos(students, default_photo_path, desired_size=1000, photos_f
                         photo_file.write(response.content)
                 else:
                     print(f"Impossible de télécharger la photo de {student.prenom} {student.nom}.")
-            cropped_photo_path = rogner_photo(photo_path, desired_size=desired_size)
+            cropped_photo_path = rogner_photo(photo_path, photos_folder_cropped=os.path.join(os.path.dirname(photos_folder), "photos_cropped", desired_size=desired_size))
             student.photo_path = cropped_photo_path
     else:
         print("Échec de la connexion.")

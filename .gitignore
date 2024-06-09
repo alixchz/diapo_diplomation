@@ -5,3 +5,13 @@ photos_cropped/
 slides_Frost/
 .~lock*
 __pycache__/
+*.fls
+*.aux
+*.synctex.gz
+*.out
+*.nav
+*.log
+*.toc
+*.snm
+*.fdb_latexmk
+*.tsv#

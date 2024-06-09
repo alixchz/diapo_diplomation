@@ -27,12 +27,14 @@ def sanitize_text(text):
         sanitized_text = '\\og{} ' + sanitized_text[1:]
         sanitized_text = sanitized_text.replace('"', '\\fg{} ')
     # Remove strange characters
-    allowed_characters = set("¡áí{}\<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
+    allowed_characters = set("@¡áí{}\<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
     sanitized_text = "".join(c for c in sanitized_text if c in allowed_characters)
 
     # Cas particuliers
     sanitized_text = sanitized_text.replace('(  .  )', '')
-    
+
     if sanitized_text != text:
-        print(f"Texte nettoyé : {text} -> {sanitized_text}")
+        with open('checks/check_citation_cleaning.csv', 'a') as file:
+            file.write(f'"{text}";"{sanitized_text}"\n')
+        #print(f"Texte nettoyé : {text} -> {sanitized_text}")
     return sanitized_text

@@ -14,7 +14,7 @@ FULL_NAMES = {
     'OCENE': 'Objets communicants et électronique numérique embarquée',
     'NUMVI': 'Numérique et Vivant',
     'ELEN': 'Electronic Engineering',
-    'ICE': '???',
+    'ICE': 'Information and Communication Engineering',
     'RE': 'Ressources Énergétiques',
     'E2': 'Efficacité Énergétique',
     'PEG': 'Power Energy Grids',
@@ -34,6 +34,7 @@ FULL_NAMES = {
     'VSE': 'Vivant, Santé, Environnement',
     'GSI': 'Grands Systèmes en Interaction',
     'CVT': 'Construction, Ville, Transports',
+    'SCOC': 'Systèmes Communicants et Objets Connectés',
 }
 
 MENTIONS_OF_DOMINANTES = {
