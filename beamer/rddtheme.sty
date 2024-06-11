@@ -1,0 +1,30 @@
+\ProvidesPackage{rddtheme}
+
+% Définir les couleurs
+\definecolor{myColor1}{RGB}{0,0,0} % Noir
+\definecolor{myColor2}{RGB}{255,255,255} % Blanc
+
+% Définir le thème global
+\mode<presentation>
+\setbeamercolor{normal text}{fg=myColor1,bg=myColor2}
+\setbeamercolor{structure}{fg=myColor1}
+
+% Définir le thème du titre
+\setbeamertemplate{frametitle}{
+  \vspace*{1cm} % Espacement en haut
+  \begin{center}
+    \insertframetitle % Insérer le titre
+  \end{center}
+  \par
+  \vspace*{-0.5cm} % Espacement en bas
+}
+
+% Afficher les sections en haut
+\setbeamertemplate{headline}{
+  \vspace*{0.5cm}
+  $\quad$\textbf{\insertshorttitle}
+  \par
+  \vspace*{0.25cm}
+  \insertsectionnavigationhorizontal{\textwidth}{}{}
+}
+\mode<all>

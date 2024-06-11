@@ -16,6 +16,7 @@ class Session():
             self.dominantes[nom_dominante] = MENTIONS_OF_DOMINANTES[nom_dominante]
 
 SESSIONS = [
+    Session('Test', 9, '14h00', ['VSE']),
     Session('Michelin', 1, '14h00', ['MDS', 'PNT']), 
     Session('EDF'     , 1, '14h15', ['IN', 'SCOC']), 
     Session('Michelin', 2, '16h00', ['EN', 'VSE']), 

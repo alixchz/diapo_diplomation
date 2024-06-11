@@ -36,7 +36,7 @@ def sanitize_text(text):
         sanitized_text = sanitized_text.replace('"', '\\fg{} ')
 
     # Remove unsupported characters
-    allowed_characters = set("@ ¡áí{}%\/<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
+    allowed_characters = set("@ ¡áí{}%#\/<> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_()+.,:;!'?éèàùâêîôûäëïöüÿçÉÈÀÙÂÊÎÔÛÄËÏÖÜŸÇ~`^&= ")
     sanitized_text = "".join(c for c in sanitized_text if c in allowed_characters)
 
     # Cas particuliers
