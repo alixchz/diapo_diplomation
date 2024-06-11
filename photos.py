@@ -4,7 +4,9 @@ import requests
 from tqdm import tqdm
 from PIL import Image, ImageDraw, ImageOps
 
-credentials = yaml.safe_load(open('credentials.yml'))
+from constantes import PATHS, IMAGE_SIZE
+
+credentials = yaml.safe_load(open(PATHS['framaforms_credentials']))
 data = {
     'name': credentials["username"],
     'pass': credentials["password"],
@@ -13,9 +15,10 @@ data = {
     'op': 'Se connecter'
 }
 
-def rogner_photo(photo_path, photos_folder_cropped, desired_size=1000):
+def rogner_photo(photo_path):
+    desired_size = IMAGE_SIZE
     photo_name = os.path.basename(photo_path).replace('jpg', 'png')
-    cropped_photo_path = os.path.join(photos_folder_cropped, photo_name)
+    cropped_photo_path = os.path.join(PATHS['photos_folder_cropped'], photo_name)
 
     # Ne pas recrop si la photo croppée existe déjà et est de la bonne taille
     if os.path.isfile(cropped_photo_path):
@@ -58,7 +61,8 @@ def rogner_photo(photo_path, photos_folder_cropped, desired_size=1000):
     img.putalpha(mask)
 
     # Suppress the image outside the mask
-                                                                            
+    img = img.crop(img.getbbox())
+    new_width=img.size[0]
     new_width=new_width*3700
     new_height=img.size[1]
     new_height=new_height*3700
@@ -67,21 +71,19 @@ def rogner_photo(photo_path, photos_folder_cropped, desired_size=1000):
     return cropped_photo_path
 
 
-def telecharger_photos(students, default_photo_path, photos_folder, desired_size=1000):
-    if not os.path.exists(photos_folder):
-        os.makedirs(photos_folder)
+def telecharger_photos(students):
     session = requests.session()
     # Envoyer la requête POST pour se connecter
     response = session.post('https://framaforms.org/user', data=data)
     if response.status_code == 200:
-        print("Connexion à Framaforms réussie !\nTéléchargement des photos...")
+        print("Connexion à Framaforms réussie !\nRécupération et rognage des photos...")
         for student in tqdm(students):
             photo_name = f"{student.prenom}_{student.nom}.jpg"
-            photo_path = os.path.join(photos_folder, photo_name)
+            photo_path = os.path.join(PATHS['photos_folder'], photo_name)
             if not os.path.isfile(photo_path):
                 photo_url = student.photo_url
                 if len(photo_url) == 0:
-                    student.photo_path = default_photo_path
+                    student.photo_path = PATHS['default_photo_cropped']
                     continue
                 response = session.get(photo_url, stream=True)
                 if response.status_code == 200:
@@ -89,7 +91,6 @@ def telecharger_photos(students, default_photo_path, photos_folder, desired_size
                         photo_file.write(response.content)
                 else:
                     print(f"Impossible de télécharger la photo de {student.prenom} {student.nom}.")
-            cropped_photo_path = rogner_photo(photo_path, photos_folder_cropped=os.path.join(os.path.dirname(photos_folder), "photos_cropped", desired_size=desired_size))
-            student.photo_path = cropped_photo_path
+            student.photo_path = rogner_photo(photo_path)
     else:
         print("Échec de la connexion.")
