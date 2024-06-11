@@ -1,8 +1,8 @@
 import os
-
+import random
 # Seules les constantes (variables en majuscule) doivent être modifiées (sauf exception)
 
-IMAGE_SIZE = 200 # temporaire pour avoir pdf plus léger
+IMAGE_SIZE = 150 #random.randint(100,200) # temporaire pour avoir pdf plus léger
 DEFAULT_PHOTO_FILENAME = 'default.jpg'
 
 # ==============================================================================
@@ -20,15 +20,6 @@ MENTIONS_OTHER_EXCEPTIONS = {
         'PSY': ['DD'] # ATTENTION fort risque que ce ne soit pas robuste, fonctionne uniquement car 1 seul élève avait mis "DD" comme mention autre
     }
 
-ETUNUMS_TO_SKIP = []
-ETUNUMS_TO_SKIP_ood = [
-    '2001574',
-    '1900808',
-    '1900910',
-    '1900841',
-    '0000000'
-]
-
 TEXT_ELEMENTS_TO_REMOVE = [
     '(  .  )', # partially cleaned emoji with special characters
     ]
@@ -39,7 +30,7 @@ TEXT_ELEMENTS_TO_REMOVE = [
 
 root_path = os.path.dirname(os.path.abspath(__file__))
 
-folders = ['data', 'checks', 'data/photos', 'data/photos_cropped']
+folders = ['data', 'checks', 'data/photos', 'data/photos_cropped', 'data/photos_exceptions']
 for folder in folders:
     if not os.path.isdir(folder):
         os.mkdir(folder)
@@ -55,6 +46,7 @@ PATHS = {
     'mentions_other_check_table': 'checks/mentions_autres_affectation.csv',
     'photos_folder': 'data/photos',
     'photos_folder_cropped': 'data/photos_cropped',
+    'photos_exception_folder': 'data/photos_exceptions',
     'default_photo_cropped': 'data/photos_cropped/default.png',
 }
 

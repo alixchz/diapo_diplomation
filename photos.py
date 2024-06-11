@@ -25,7 +25,11 @@ def rogner_photo(photo_path):
         img = Image.open(cropped_photo_path)
         if img.size[0] == desired_size:
             return cropped_photo_path
-        
+    
+    exception_image_path = os.path.join(PATHS['photos_exception_folder'], os.path.basename(photo_path))
+    if os.path.isfile(exception_image_path):
+        photo_path = exception_image_path
+
     img = Image.open(photo_path)
     img = ImageOps.exif_transpose(img)
     img=img.convert('RGBA')
