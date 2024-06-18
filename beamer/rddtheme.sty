@@ -37,27 +37,28 @@
 %\setbeamercolor{frametitle}{bg=gray!15,fg=black} % Utiliser votre couleur gris clair
 % Afficher les sections en haut
 \setbeamertemplate{headline}{
-  \vspace*{0.5cm}
-  \hspace*{1cm}
-  % 2 colonnes avec à gauche le logo de CentraleSupélec et à droite le texte
-  \begin{minipage}[]{0.25\textwidth} % Largeur de la première colonne
-    \includegraphics[width=2cm]{//home/alix/Images/logo_centralesupelec.png} 
-  \end{minipage}
-  \begin{minipage}[]{0.5\textwidth} % Largeur de la deuxième colonne
-    {\scriptsize \textbf{\insertshorttitle}} \\
-    $\quad$ \\
-    {\tiny
-    \insertsection \\
-    \insertsubsection % Afficher les sections
-    }
-  \end{minipage}
-  %$\quad\quad${\small \textbf{\insertshorttitle}}
-  %$\quad\quad${\small \textbf{\inserttitle} \par \\ 21 juin \oldstylenums{2024}}
+  %\vspace*{0.5cm}
+  \begin{center}
+    % 2 colonnes avec à gauche le logo de CentraleSupélec et à droite le texte
+    \begin{minipage}[]{0.20\textwidth} % Largeur de la première colonne
+      \includegraphics[width=2cm]{//home/alix/Images/logo_centralesupelec.png} 
+    \end{minipage}
+    \begin{minipage}[]{0.5\textwidth} % Largeur de la deuxième colonne
+      {\scriptsize \textbf{\insertshorttitle}} \\
+      $\quad$ \\
+      {\tiny
+      \insertsection \\
+      \insertsubsection % Afficher les sections
+      }
+    \end{minipage}
+    %$\quad\quad${\small \textbf{\insertshorttitle}}
+    %$\quad\quad${\small \textbf{\inserttitle} \par \\ 21 juin \oldstylenums{2024}}
+  \end{center}
   %\par
   %\vspace*{0.5cm}
   %$\quad\quad$\insertsection $\quad$/$\quad$ \insertsubsection$\quad\quad$
   %\insertsectionnavigationhorizontal{\textwidth}{}{}  
-  \vspace*{-0.5cm}
+  \vspace*{-0.8cm}
 }
 
 % Définir le style des slides de titre de section
