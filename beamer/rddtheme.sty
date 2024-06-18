@@ -1,6 +1,8 @@
 \ProvidesPackage{rddtheme}
 \usepackage{transparent}
 \usepackage{graphicx}
+\definecolor{bordeauxCS}{RGB}{132, 29, 59} % bordeau CentraleSupélec
+\definecolor{grisCS}{RGB}{114, 104, 128} % gris CentraleSupélec
 
 % Définir les couleurs
 \definecolor{myColor1}{RGB}{0,0,0} % Noir
@@ -23,12 +25,16 @@
   \vspace*{-0.5cm} % Espacement en bas
 }
 
-\usebackgroundtemplate%
+
+\usebackgroundtemplate% photo alignée en bas de la slide
 {   {\transparent{0.2}
     \includegraphics[width=\paperwidth,height=\paperheight]{/home/alix/diapo_diplomation/confetti2.png}%
 }
 }
 
+\definecolor{mylightgray}{RGB}{150,150,150} % Définir votre propre couleur gris clair
+\setbeamercolor{headline}{bg=gray!15,fg=black} % Utiliser votre couleur gris clair
+%\setbeamercolor{frametitle}{bg=gray!15,fg=black} % Utiliser votre couleur gris clair
 % Afficher les sections en haut
 \setbeamertemplate{headline}{
   %\vspace*{0.5cm}
@@ -41,12 +47,12 @@
   \begin{minipage}{0.75\textwidth} % Largeur de la deuxième colonne
     {\small \textbf{\insertshorttitle}} % Remplacez par votre texte
   \end{minipage}
-
   %$\quad\quad${\small \textbf{\insertshorttitle}}
   %$\quad\quad${\small \textbf{\inserttitle} \par \\ 21 juin \oldstylenums{2024}}
-  \par
-  \vspace*{0.5cm}
-  $\quad\quad$\insertsection $\quad$/$\quad$ \insertsubsection$\quad\quad$
+  %\par
+  %\vspace*{0.5cm}
+  %$\quad\quad$\insertsection $\quad$/$\quad$ \insertsubsection$\quad\quad$
   %\insertsectionnavigationhorizontal{\textwidth}{}{}  
+  \vspace*{-0.5cm}
 }
 \mode<all>

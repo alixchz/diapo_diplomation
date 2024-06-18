@@ -38,12 +38,13 @@ for folder in folders:
 PATHS = {
     # IMPORTANT à remplir : chemins vers les tableurs contenant les données des élèves
     'csv_personnalisation': 'data/personnalisation_de_ton_passage_sur_scene.tsv',
-    'excel_presents': 'data/guests_and_checkins_rdd_cs_2024_32.xlsx',
+    'excel_presents': 'data/Liste diplômés présents RDD 13.06.2024.xlsx',
 
     # Autres chemins (normalement inutile de les modifier)
     'framaforms_credentials': 'credentials.yml', 
     'citation_cleaning_check_table': 'checks/check_citation_cleaning.csv',
     'mentions_other_check_table': 'checks/mentions_autres_affectation.csv',
+    'etunums_mismatchs_check_table': 'checks/etunums_mismatchs.csv',
     'photos_folder': 'data/photos',
     'photos_folder_cropped': 'data/photos_cropped',
     'photos_exception_folder': 'data/photos_exceptions',

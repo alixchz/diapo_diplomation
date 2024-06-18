@@ -16,7 +16,7 @@ class Session():
             self.dominantes[nom_dominante] = MENTIONS_OF_DOMINANTES[nom_dominante]
 
 SESSIONS = [
-    Session('Test', 9, '14h00', ['VSE']),
+    Session('Test', 9, '14h00', ['SCOC', 'VSE']),
     Session('Michelin', 1, '14h00', ['MDS', 'PNT']), 
     Session('EDF'     , 1, '14h15', ['IN', 'SCOC']), 
     Session('Michelin', 2, '16h00', ['EN', 'VSE']), 
@@ -76,21 +76,21 @@ def generate_beamer(session):
 
     with open(beamer_content_filename, "w") as f:
         for dominante in session.dominantes.keys():
-            f.write("\\begin{section}{Dominante " + dominante + " - " + FULL_NAMES[dominante] + "}")
+            f.write("\\begin{section}{Dominante " + dominante + " - " + FULL_NAMES[dominante] + "}\n\n")
             for mention in session.dominantes[dominante]:
                 if mention not in students_by_mention:
                     print(f"La mention {mention} n'a pas d'étudiant.")
                     continue
-                f.write("\\begin{subsection}{Mention " + mention + " - " + FULL_NAMES[mention] + "}")
+                f.write("\\begin{subsection}{Mention " + mention + " - " + FULL_NAMES[mention] + "}\n\n")
                 for student in students_by_mention[mention]:
                     f.write("\\begin{frame}{" + student.prenom + " \\textsc{" + student.nom + "}}{Mention " + student.mention + "}\n")
 
                     if len(student.photo_path) > 0:
                         f.write("\\begin{figure}\n")
-                        f.write("    \\includegraphics[height=0.4\\textheight]{" + student.photo_path + "}\n")
+                        f.write("    \\includegraphics[height=0.5\\textheight]{" + student.photo_path + "}\n")
                         f.write("\\end{figure}\n")
                     if len(student.citation) > 0:
-                        f.write("\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}\n")
+                        f.write("\\footnotesize{\\begin{center}\n \\textit{" + student.citation + "}\n\\end{center}}\n")
                     f.write("\\end{frame}\n\n")
                 f.write("\\end{subsection}\n")
             f.write("\\end{section}\n")

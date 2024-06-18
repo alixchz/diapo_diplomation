@@ -78,10 +78,10 @@ def read_framaforms_tsv(nom_fichier):
             prenom_nom = f"{unidecode(prenom).lower()}_{unidecode(nom).lower()}"
 
             if etunum in etunums:
-                print('Doublon :', prenom, nom, etunum)
+                #print('Doublon :', prenom, nom, etunum)
                 students_doubles_to_remove_idx.append(max(loc for loc, val in enumerate(etunums) if val ==etunum))
             elif prenom_nom in prenoms_noms:
-                print('Doublon :', prenom, nom, etunum)
+                #print('Doublon :', prenom, nom, etunum)
                 students_doubles_to_remove_idx.append(max(loc for loc, val in enumerate(prenoms_noms) if val == prenom_nom))
 
             student = Student(prenom, nom, etunum, citation=citation, photo_url=photo_url)
@@ -116,9 +116,12 @@ def read_students_list(nom_fichier):
                 file.write(f"{etunum};{prenom};{nom};{mention_autre};{mention}\n")
         student = Student(prenom, nom, etunum, mention, email)
         students.append(student)
+    print(f"Nombre d'étudiants présents : {len(students)}")
     return students
 
 def ajout_personnalisation(students_all, students_personalized):
+    with open(PATHS['etunums_mismatchs_check_table'], 'w') as file:
+        file.write(f"billetterie;personnalisation\n")
     for student in students_all:
         student.photo_path = PATHS['default_photo_cropped']
         for i, student_personalized in enumerate(students_personalized):
@@ -130,10 +133,14 @@ def ajout_personnalisation(students_all, students_personalized):
     to_remove = []
     for i, unmatched_personnalization in enumerate(students_personalized):
         for student in students_all:
+            #print(student.etunum, student.nom, student.prenom)
             if unidecode(unmatched_personnalization.nom) == unidecode(student.nom):
                 if unidecode(unmatched_personnalization.prenom[0:3]) == unidecode(student.prenom[0:3]):
                     student.add_personnalization(unmatched_personnalization)
                     to_remove.append(i)
+                    # Check that the matches by name are good
+                    with open(PATHS['etunums_mismatchs_check_table'], 'a') as file:
+                        file.write(f"{student.nom} {student.prenom} ({student.etunum});{unmatched_personnalization.nom} {unmatched_personnalization.prenom}({unmatched_personnalization.etunum})\n")
     students_personalized = [s for i, s in enumerate(students_personalized) if i not in to_remove]
     if len(students_personalized) > 0:
         raise Exception(f"Les étudiants suivants n'ont pas été trouvés : { [[s.nom, s.prenom, s.etunum] for s in students_personalized]}")

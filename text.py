@@ -53,6 +53,7 @@ def sanitize_mention(mention_from_excel):
         return ""
     mention_from_excel = mention_from_excel.replace('Msc', 'MSc')
     mention_from_excel = mention_from_excel.replace('MSc IA', 'MSc AI')
+    mention_from_excel = mention_from_excel.replace('SCMA', 'MACS')
     matches = []
     for mention in FULL_NAMES.keys():
         if mention in mention_from_excel:
