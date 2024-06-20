@@ -58,6 +58,11 @@ def sanitize_mention(mention_from_excel):
     for mention in FULL_NAMES.keys():
         if mention in mention_from_excel:
             matches.append(mention)
+    if 'SDI' in mention_from_excel:
+        if 'Metz' in mention_from_excel:
+            matches.append('SDI (M)')
+        else:
+            matches.append('SDI (PS)')
     if len(matches) == 0:
         raise Exception(f"Pas de correspondance pour la mention '{mention_from_excel}'.")
     return max(matches, key=len)

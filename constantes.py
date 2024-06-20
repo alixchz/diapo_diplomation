@@ -2,7 +2,7 @@ import os
 import random
 # Seules les constantes (variables en majuscule) doivent être modifiées (sauf exception)
 
-IMAGE_SIZE = 150 #random.randint(100,200) # temporaire pour avoir pdf plus léger
+IMAGE_SIZE = 151 #random.randint(100,200) # temporaire pour avoir pdf plus léger
 DEFAULT_PHOTO_FILENAME = 'default.jpg'
 
 # ==============================================================================
@@ -38,7 +38,7 @@ for folder in folders:
 PATHS = {
     # IMPORTANT à remplir : chemins vers les tableurs contenant les données des élèves
     'csv_personnalisation': 'data/personnalisation_de_ton_passage_sur_scene.tsv',
-    'excel_presents': 'data/Liste diplômés présents RDD 13.06.2024.xlsx',
+    'excel_presents': 'data/Liste diplômés présents RDD 19.06.2024.xlsx',
 
     # Autres chemins (normalement inutile de les modifier)
     'framaforms_credentials': 'credentials.yml', 
@@ -66,7 +66,8 @@ PATHS['default_photo_cropped'] = os.path.join(PATHS['photos_folder_cropped'], DE
 
 FULL_NAMES = {
     'MMF': 'Modélisation mathématique et Mathématiques Financières',
-    'SDI': "Sciences des Données et de l'Information",
+    'SDI (PS)': "Sciences des Données et de l'Information (Paris-Saclay)",
+    'SDI (M)': "Sciences des Données et de l'Information (Metz)",
     'MSc DSBA': 'Master in Data Sciences \\& Business Analytics',
     'QTE': 'Quantum Engineering',
     'PSY': 'Photonic and nanosystem engineering',
@@ -104,7 +105,7 @@ FULL_NAMES = {
 }
 
 MENTIONS_OF_DOMINANTES = {
-    'MDS': ['MMF', 'SDI', 'MSc DSBA'],
+    'MDS': ['MMF', 'SDI (PS)', 'SDI (M)', 'MSc DSBA'],
     'PNT': ['QTE', 'PSY'],
     'IN': ['IA','SL', 'ASI', 'CYBER', 'MSc AI'],
     'SCOC': ['SRI', 'MACS', 'OCENE', 'NUMVI', 'ELEN', 'ICE'],

@@ -48,7 +48,7 @@ for student in students_all:
 for mention in students_by_mention:
     students_by_mention[mention].sort(key=lambda student: student.nom)
 
-'''
+
 # Comptage du nombre d'étudiants par mention
 total = 0
 print("\nRépartition des étudiants par mention :")
@@ -56,7 +56,7 @@ for mention in students_by_mention:
     print(f"{mention} : {len(students_by_mention[mention])} étudiants")
     total += len(students_by_mention[mention])
 print(f"\nTotal : {total} étudiants\n")
-'''
+
 
 # Comptage du nombre d'étudiants par session
 for session in SESSIONS:
