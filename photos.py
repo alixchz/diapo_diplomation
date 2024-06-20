@@ -59,19 +59,24 @@ def rogner_photo(photo_path):
 
     mask = Image.new("L", img.size, 0)
     draw = ImageDraw.Draw(mask)
-    draw.ellipse((x_0, y_0, x_1, y_1), fill=255)
+    draw.ellipse((x_0, y_0, x_1, y_1), fill=255, outline=0)  # Set outline color to black
 
     # Apply the mask to the image
     img.putalpha(mask)
+    
 
     # Suppress the image outside the mask
     img = img.crop(img.getbbox())
-    new_width=img.size[0]
-    new_width=new_width*3700
-    new_height=img.size[1]
-    new_height=new_height*3700
-
+ 
     img.save(cropped_photo_path)
+    """ 
+    img = Image.open(cropped_photo_path)
+    # Add black border
+    draw = ImageDraw.Draw(img)
+    draw.arc((0, 0, desired_size, desired_size), start=0, end=360, fill=(0, 0, 0))
+    img.save(cropped_photo_path) 
+    """
+
     return cropped_photo_path
 
 

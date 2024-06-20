@@ -2,7 +2,7 @@ import os
 import random
 # Seules les constantes (variables en majuscule) doivent être modifiées (sauf exception)
 
-IMAGE_SIZE = 151 #random.randint(100,200) # temporaire pour avoir pdf plus léger
+IMAGE_SIZE = 251 # temporaire pour avoir pdf plus léger
 DEFAULT_PHOTO_FILENAME = 'default.jpg'
 
 # ==============================================================================
@@ -113,4 +113,34 @@ MENTIONS_OF_DOMINANTES = {
     'VSE': ['HSB', 'ESP'],
     'GSI': ['CE', 'DS', 'SCOM'], 
     'CVT': ['MSc ITM', 'AET', 'SIC']
+}
+
+RESPONSABLES_MENTIONS = {
+    'MMF': 'Modélisation mathématique et Mathématiques Financières',
+    'SDI (PS)': "Sciences des Données et de l'Information (Paris-Saclay)",
+    'SDI (M)': "Sciences des Données et de l'Information (Metz)",
+    'MSc DSBA': 'Master in Data Sciences \\& Business Analytics',
+    'QTE': 'Quantum Engineering',
+    'PSY': 'Photonic and nanosystem engineering',
+    'IA': 'Intelligence Artificielle',
+    'SL': 'Sciences du Logiciel',
+    'ASI': 'Architecture des Systèmes Informatiques',
+    'CYBER': 'Cybersécurité',
+    'MSc AI': 'Master in Artificial Intelligence',
+    'SRI': 'Systèmes et Réseaux Intelligents',
+    'MACS': 'Systèmes communicants mobiles et autonomes',
+    'OCENE': 'Objets communicants et électronique numérique embarquée',
+    'NUMVI': 'Numérique et Vivant',
+    'ELEN': 'Electronic Engineering',
+    'ICE': 'Information and Communication Engineering',
+    'RE': 'Ressources Énergétiques',
+    'E2': 'Efficacité Énergétique',
+    'PEG': 'Power Energy Grids',
+    'SES': 'Sustainable Energy Systems',
+    'HSB': 'Healthcare et Services en Biomédical',
+    'ESP': 'Environnement et Production Durable',
+    'CE': 'Control Engineering',
+    'DS': 'Design and System Sciences',
+    'SCOM': 'Supply Chain \\& Operations Management',
+    'MSc ITM': 'Master in Industry Transformation Management',
 }

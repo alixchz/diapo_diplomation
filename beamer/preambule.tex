@@ -18,17 +18,22 @@
 %\usepackage[scaled=0.875]{helvet}
 \usefonttheme{serif}
 
-\AtBeginSection[]{
-  \begin{frame}[plain]
-    \centering
-    \Large \insertsection
-  \end{frame}
-}
+
+% \AtBeginSection[]{
+%   \begin{frame}[plain]
+%     \centering
+%     \Large \insertsection
+%   \end{frame}
+% }
 
 \AtBeginSubsection[]{
-  \begin{frame}
+  \begin{frame}[plain]
     \centering
-    \Large \insertsubsection
+    \Large \insertsection \\
+    \vspace*{1cm}
+    \textbf{
+      \Large \insertsubsection
+      }
   \end{frame}
 }
 
